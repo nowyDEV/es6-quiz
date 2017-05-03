@@ -1,8 +1,11 @@
 import fetch from 'isomorphic-fetch'
 
 const actionButton = document.querySelector('.btn')
-actionButton.onclick = () => startQuiz()
 const questionsField = document.querySelector('.quiz-questions')
+let countdown
+const quizTimer = document.querySelector('.quiz-timer')
+
+actionButton.onclick = () => startQuiz()
 
 const Quiz = {
   timer: 0,
@@ -12,11 +15,29 @@ const Quiz = {
   correctAnswer: 0
 }
 
+function getData () {
+  const URL = 'https://cdn.rawgit.com/kdzwinel/cd08d08002995675f10d065985257416/raw/811ad96a0567648ff858b4f14d0096ba241f28ef/quiz-data.json'
+
+  function processData (data) {
+    Quiz.timer = data.time_seconds
+    Quiz.questions = data.questions
+    console.log(Quiz)
+  }
+
+  return fetch(URL)
+    .then(response => response.json())
+    .then(data => processData(data))
+    .catch(error => console.log('BAD', error))
+}
+getData()
+
 function showResult () {
   const result = Quiz.userPoints
   const total = Quiz.questions.length
-  document.querySelector('.quiz-results').innerHTML = `Correct answers: ${result} / ${total}`
   actionButton.style.display = 'none'
+  questionsField.style.display = 'none'
+  quizTimer.style.display = 'none'
+  document.querySelector('.quiz-results').innerHTML = `Correct answers: ${result} / ${total}`
 }
 
 function processAnswer () {
@@ -32,7 +53,9 @@ function processAnswer () {
 
 function startQuiz () {
   actionButton.onclick = () => processAnswer()
+  timer(Quiz.timer)
   actionButton.innerHTML = 'next'
+  actionButton.setAttribute('disabled', '')
   updateQuestion(Quiz.questions, Quiz.currentQuestion)
 }
 
@@ -40,6 +63,13 @@ function updateQuestion (questions, index) {
   const question = questions[index]
   questionsField.innerHTML = loadQuestion(question)
   Quiz.currentQuestion += 1
+  actionButton.setAttribute('disabled', '')
+  const answerInputs = document.getElementsByClassName('quiz-questions__answer')
+  for (let i = 0; i < answerInputs.length; i++) {
+    answerInputs[i].addEventListener('click', function () {
+      actionButton.removeAttribute('disabled')
+    })
+  }
 }
 
 function loadQuestion (question) {
@@ -62,25 +92,6 @@ function loadAnswers (answers) {
   })
 }
 
-function getData () {
-  const URL = 'https://cdn.rawgit.com/kdzwinel/cd08d08002995675f10d065985257416/raw/811ad96a0567648ff858b4f14d0096ba241f28ef/quiz-data.json'
-
-  function processData (data) {
-    Quiz.timer = data.time_seconds
-    Quiz.questions = data.questions
-    console.log(Quiz)
-  }
-
-  return fetch(URL)
-    .then(response => response.json())
-    .then(data => processData(data))
-    .catch(error => console.log('BAD', error))
-}
-getData()
-
-let countdown
-const quizTimer = document.querySelector('.quiz-timer')
-
 function timer (seconds) {
   const presentTime = Date.now()
   const finishTime = presentTime + seconds * 1000
@@ -90,12 +101,11 @@ function timer (seconds) {
     const secondsLeft = Math.round((finishTime - Date.now()) / 1000)
     if (secondsLeft < 0) {
       clearInterval(countdown)
+      showResult()
     }
     displayTime(secondsLeft)
   }, 1000)
 }
-
-timer(300)
 
 function displayTime (seconds) {
   const minutesLeft = Math.floor(seconds / 60)
