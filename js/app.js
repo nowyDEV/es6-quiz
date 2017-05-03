@@ -8,7 +8,8 @@ const Quiz = {
   timer: 0,
   questions: [],
   userPoints: 0,
-  currentQuestion: 0
+  currentQuestion: 0,
+  correctAnswer: 0
 }
 
 function showResult () {
@@ -19,8 +20,11 @@ function showResult () {
 
 function processAnswer () {
   if (Quiz.currentQuestion <= Quiz.questions.length) {
-    const answer = document.querySelector('input[name=answer]:checked')
-    console.log(answer)
+    const answer = parseInt(document.querySelector('input[name=answer]:checked').getAttribute('id'))
+    if (answer === Quiz.correctAnswer) {
+      Quiz.userPoints += 1
+      console.log(Quiz.userPoints)
+    }
   } else showResult()
 }
 
@@ -44,9 +48,16 @@ function loadQuestion (question) {
             </form>`
 }
 
+function updateCorrectAnswer (id) {
+  Quiz.correctAnswer = id
+}
+
 function loadAnswers (answers) {
   return answers.map((answer) => {
-    return `<input type="radio" name="answer" value="${answer.answer}" class="quiz-questions__answer">${answer.answer}`
+    if (answer.correct) {
+      updateCorrectAnswer(answer.id)
+    }
+    return `<input type="radio" name="answer" value="${answer.answer}" class="quiz-questions__answer" id="${answer.id}">${answer.answer}`
   })
 }
 
