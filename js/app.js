@@ -16,29 +16,30 @@ function showResult () {
   const result = Quiz.userPoints
   const total = Quiz.questions.length
   document.querySelector('.quiz-results').innerHTML = `Correct answers: ${result} / ${total}`
+  actionButton.style.display = 'none'
 }
 
 function processAnswer () {
-  if (Quiz.currentQuestion <= Quiz.questions.length) {
+  if (Quiz.currentQuestion < Quiz.questions.length) {
     const answer = parseInt(document.querySelector('input[name=answer]:checked').getAttribute('id'))
     if (answer === Quiz.correctAnswer) {
       Quiz.userPoints += 1
       console.log(Quiz.userPoints)
     }
+    updateQuestion(Quiz.questions, Quiz.currentQuestion)
   } else showResult()
 }
 
 function startQuiz () {
-  Quiz.inProgress = true
-  Quiz.currentQuestion = 1
-  actionButton.innerHTML = 'next'
   actionButton.onclick = () => processAnswer()
-  updateQuestion(Quiz.questions, 0)
+  actionButton.innerHTML = 'next'
+  updateQuestion(Quiz.questions, Quiz.currentQuestion)
 }
 
 function updateQuestion (questions, index) {
   const question = questions[index]
   questionsField.innerHTML = loadQuestion(question)
+  Quiz.currentQuestion += 1
 }
 
 function loadQuestion (question) {
