@@ -1,5 +1,8 @@
 import fetch from 'isomorphic-fetch'
-document.querySelector('.btn').onclick = () => startQuiz()
+
+const actionButton = document.querySelector('.btn')
+actionButton.onclick = () => startQuiz()
+const questionsField = document.querySelector('.quiz-questions')
 
 const Quiz = {
   timer: 0,
@@ -9,14 +12,43 @@ const Quiz = {
   inProgress: false
 }
 
+function showResult () {
+  const result = Quiz.userPoints
+  const total = Quiz.questions.length
+  document.querySelector('.quiz-results').innerHTML = `Correct answers: ${result} / ${total}`
+}
+
+function processAnswer () {
+  if (Quiz.currentQuestion <= Quiz.questions.length) {
+    const answer = document.querySelector('input[name=answer]:checked')
+    console.log(answer)
+  } else showResult()
+}
+
 function startQuiz () {
   Quiz.inProgress = true
   Quiz.currentQuestion = 1
-  loadQuestion(Quiz.questions, Quiz.currentQuestion)
+  actionButton.innerHTML = 'next'
+  actionButton.onclick = () => processAnswer()
+  updateQuestion(Quiz.questions, 0)
 }
 
-function loadQuestion (questions, index) {
-  return true
+function updateQuestion (questions, index) {
+  const question = questions[index]
+  questionsField.innerHTML = loadQuestion(question)
+}
+
+function loadQuestion (question) {
+  return `<h3 class="quiz-questions__title">${question.question}</h3>"
+            <form class="quiz-questions__form">
+                ${loadAnswers(question.answers)}    
+            </form>`
+}
+
+function loadAnswers (answers) {
+  return answers.map((answer) => {
+    return `<input type="radio" name="answer" value="${answer.answer}" class="quiz-questions__answer">${answer.answer}`
+  })
 }
 
 function getData () {
@@ -33,12 +65,10 @@ function getData () {
     .then(data => processData(data))
     .catch(error => console.log('BAD', error))
 }
-
 getData()
 
 let countdown
 const quizTimer = document.querySelector('.quiz-timer')
-// const quizQuestions = document.querySelector('.quiz-questions')
 
 function timer (seconds) {
   const presentTime = Date.now()
