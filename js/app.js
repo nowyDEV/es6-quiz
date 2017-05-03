@@ -8,8 +8,7 @@ const Quiz = {
   timer: 0,
   questions: [],
   userPoints: 0,
-  currentQuestion: 0,
-  inProgress: false
+  currentQuestion: 0
 }
 
 function showResult () {
