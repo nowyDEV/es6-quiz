@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch'
 import { apiUrl } from './config'
-import { displayTime } from './timer'
+import { displayTime } from './utils'
 
 function app () {
   const actionButton = document.querySelector('.quiz-btn')
