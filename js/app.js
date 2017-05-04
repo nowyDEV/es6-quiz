@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch'
 import { apiUrl } from './config'
-import { displayTime, disableElement, activateElement } from './utils'
+import { utils } from './utils'
 
 function app () {
   const actionButton = document.querySelector('.quiz-btn')
@@ -9,12 +9,10 @@ function app () {
   const quizResults = document.querySelector('.quiz-results')
   let countdown
 
-  actionButton.onclick = () => Quiz.start()
-
   // Toggle off disabled state on the button after user checks answer
   questionsField.addEventListener('click', function (e) {
     if (e.target.matches('.quiz-questions__answer')) {
-      activateElement(actionButton)
+      utils.activateElement(actionButton)
     }
   }, false)
 
@@ -30,14 +28,10 @@ function app () {
     updateCorrectAnswer (id) {
       this.correctAnswer = id
     }
-    init () {
-      this.getData()
-    }
     getData () {
       const processData = (data) => {
         this.timer = data.time_seconds
         this.questions = data.questions
-        this.start()
       }
 
       return fetch(this.dataUrl)
@@ -48,7 +42,7 @@ function app () {
     start () {
       actionButton.onclick = () => this.processAnswer()
       actionButton.innerHTML = 'Next'
-      disableElement(actionButton)
+      utils.disableElement(actionButton)
       timer(this.timer)
       this.updateQuestion(this.questions, 0)
     }
@@ -59,7 +53,7 @@ function app () {
                                       ${this.loadAnswers(question.answers).join('')}    
                                   </form>`
       this.currentQuestion += 1
-      disableElement(actionButton)
+      utils.disableElement(actionButton)
     }
     reset () {
       this.userPoints = 0
@@ -79,7 +73,7 @@ function app () {
 
       actionButton.innerHTML = 'Try Again'
       actionButton.onclick = () => this.reset()
-      activateElement(actionButton)
+      utils.activateElement(actionButton)
 
       quizResults.innerHTML = `<div class="sg-flash">
                                  <div class="sg-flash__message">
@@ -122,7 +116,8 @@ function app () {
   }
 
   const brainlyQuiz = new Quiz(apiUrl)
-  brainlyQuiz.init()
+  brainlyQuiz.getData()
+  actionButton.onclick = () => brainlyQuiz.start()
 
   function timer (seconds) {
     clearInterval(countdown)
@@ -130,7 +125,7 @@ function app () {
     const presentTime = Date.now()
     const finishTime = presentTime + seconds * 1000
 
-    displayTime(seconds, quizTimer)
+    utils.displayTime(seconds, quizTimer)
 
     countdown = setInterval(() => {
       const secondsLeft = Math.round((finishTime - Date.now()) / 1000)
@@ -140,7 +135,7 @@ function app () {
         Quiz.stopQuiz()
       }
 
-      displayTime(secondsLeft, quizTimer)
+      utils.displayTime(secondsLeft, quizTimer)
     }, 1000)
   }
 }
