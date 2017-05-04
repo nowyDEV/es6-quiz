@@ -18,36 +18,49 @@ function app () {
     }
   }, false)
 
-  const Quiz = {
-    timer: 0,
-    questions: [],
-    userPoints: 0,
-    currentQuestion: 0,
-    correctAnswer: 0,
+  class Quiz {
+    constructor (dataUrl, userPoints = 0, currentQuestion = 0, correctAnswer = 0, timer = 0, questions = []) {
+      this.dataUrl = dataUrl
+      this.userPoints = userPoints
+      this.currentQuestion = currentQuestion
+      this.correctAnswer = correctAnswer
+      this.timer = timer
+      this.questions = questions
+    }
     updateCorrectAnswer (id) {
       this.correctAnswer = id
-    },
+    }
+    init () {
+      this.getData()
+    }
     getData () {
       const processData = (data) => {
         this.timer = data.time_seconds
         this.questions = data.questions
-        console.log(this)
+        this.start()
       }
 
-      return fetch(apiUrl)
+      return fetch(this.dataUrl)
         .then(response => response.json())
         .then(data => processData(data))
         .catch(error => console.log('Something went wrong', error))
-    },
-
+    }
     start () {
-      actionButton.onclick = () => processAnswer()
+      actionButton.onclick = () => this.processAnswer()
       actionButton.innerHTML = 'Next'
       disableElement(actionButton)
       timer(this.timer)
-      updateQuestion(this.questions, 0)
-    },
-
+      this.updateQuestion(this.questions, 0)
+    }
+    updateQuestion (questions, index) {
+      const question = questions[index]
+      questionsField.innerHTML = `<h3 class="quiz-questions__title">${question.question}</h3>
+                                  <form class="quiz-questions__form">
+                                      ${this.loadAnswers(question.answers).join('')}    
+                                  </form>`
+      this.currentQuestion += 1
+      disableElement(actionButton)
+    }
     reset () {
       this.userPoints = 0
       this.currentQuestion = 0
@@ -56,8 +69,10 @@ function app () {
       quizTimer.style.display = 'block'
       quizResults.style.display = 'none'
       this.start()
-    },
-
+    }
+    static stopQuiz () {
+      this.showResult()
+    }
     showResult () {
       questionsField.style.display = 'none'
       quizTimer.style.display = 'none'
@@ -78,51 +93,36 @@ function app () {
                                </div>`
       quizResults.style.display = 'block'
     }
+    processAnswer () {
+      if (this.currentQuestion < this.questions.length) {
+        const answer = parseInt(document.querySelector('input[name=answer]:checked').getAttribute('id'))
+        if (answer === this.correctAnswer) {
+          this.userPoints += 1
+        }
+        this.updateQuestion(this.questions, this.currentQuestion)
+      } else this.showResult()
+    }
+    loadAnswers (answers) {
+      return answers.map((answer) => {
+        if (answer.correct) {
+          this.updateCorrectAnswer(answer.id)
+        }
+
+        return `<div class="sg-label sg-label--secondary">
+                    <div class="sg-label__icon">
+                        <div class="sg-radio">
+                            <input class="sg-radio__element quiz-questions__answer" type="radio" id="${answer.id}" name="answer">
+                            <label class="sg-radio__ghost" for="${answer.id}"></label>
+                        </div>
+                    </div>
+                    <label class="sg-label__text" for="${answer.id}">${answer.answer}</label>
+                </div>`
+      })
+    }
   }
 
-  Quiz.getData()
-
-  function processAnswer () {
-    if (Quiz.currentQuestion < Quiz.questions.length) {
-      const answer = parseInt(document.querySelector('input[name=answer]:checked').getAttribute('id'))
-      if (answer === Quiz.correctAnswer) {
-        Quiz.userPoints += 1
-      }
-      updateQuestion(Quiz.questions, Quiz.currentQuestion)
-    } else Quiz.showResult()
-  }
-
-  function updateQuestion (questions, index) {
-    const question = questions[index]
-    questionsField.innerHTML = loadQuestion(question)
-    Quiz.currentQuestion += 1
-    disableElement(actionButton)
-  }
-
-  const loadQuestion = (question) => {
-    return `<h3 class="quiz-questions__title">${question.question}</h3>
-            <form class="quiz-questions__form">
-                ${loadAnswers(question.answers).join('')}    
-            </form>`
-  }
-
-  const loadAnswers = (answers) => {
-    return answers.map((answer) => {
-      if (answer.correct) {
-        Quiz.updateCorrectAnswer(answer.id)
-      }
-
-      return `<div class="sg-label sg-label--secondary">
-                  <div class="sg-label__icon">
-                      <div class="sg-radio">
-                          <input class="sg-radio__element quiz-questions__answer" type="radio" id="${answer.id}" name="answer">
-                          <label class="sg-radio__ghost" for="${answer.id}"></label>
-                      </div>
-                  </div>
-                  <label class="sg-label__text" for="${answer.id}">${answer.answer}</label>
-              </div>`
-    })
-  }
+  const brainlyQuiz = new Quiz(apiUrl)
+  brainlyQuiz.init()
 
   function timer (seconds) {
     clearInterval(countdown)
@@ -137,7 +137,7 @@ function app () {
 
       if (secondsLeft < 0) {
         clearInterval(countdown)
-        Quiz.showResult()
+        Quiz.stopQuiz()
       }
 
       displayTime(secondsLeft, quizTimer)
