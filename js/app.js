@@ -11,6 +11,13 @@ function app () {
 
   actionButton.onclick = () => Quiz.start()
 
+  // Toggle off disabled state on the button after user checks answer
+  questionsField.addEventListener('click', function (e) {
+    if (e.target.matches('.quiz-questions__answer')) {
+      activateElement(actionButton)
+    }
+  }, false)
+
   const Quiz = {
     timer: 0,
     questions: [],
@@ -90,13 +97,6 @@ function app () {
     questionsField.innerHTML = loadQuestion(question)
     Quiz.currentQuestion += 1
     disableElement(actionButton)
-
-    const answerInputs = document.getElementsByClassName('quiz-questions__answer')
-    for (let i = 0; i < answerInputs.length; i++) {
-      answerInputs[i].addEventListener('click', function () {
-        activateElement(actionButton)
-      })
-    }
   }
 
   const loadQuestion = (question) => {
