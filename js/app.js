@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch'
 
-const actionButton = document.querySelector('.btn')
+const actionButton = document.querySelector('.quiz-btn')
 const questionsField = document.querySelector('.quiz-questions')
 let countdown
 const quizTimer = document.querySelector('.quiz-timer')
@@ -37,7 +37,15 @@ function showResult () {
   actionButton.style.display = 'none'
   questionsField.style.display = 'none'
   quizTimer.style.display = 'none'
-  document.querySelector('.quiz-results').innerHTML = `Correct answers: ${result} / ${total}`
+  document.querySelector('.quiz-results').innerHTML = `<div class="sg-flash">
+                                                         <div class="sg-flash__message">
+                                                           <div class="sg-text sg-text--emphasised sg-text--standout sg-text--light">
+                                                             Correct answers: <div class="sg-badge sg-badge--large sg-badge--blue-secondary-light">
+                                                                                <div class="sg-text sg-text--emphasised sg-text--standout sg-text--blue"> ${result} / ${total}</div>
+                                                                              </div>
+                                                           </div>
+                                                         </div>
+                                                       </div>`
 }
 
 function processAnswer () {
@@ -54,7 +62,8 @@ function processAnswer () {
 function startQuiz () {
   actionButton.onclick = () => processAnswer()
   timer(Quiz.timer)
-  actionButton.innerHTML = 'next'
+  actionButton.innerHTML = 'Next'
+  actionButton.classList.add('sg-button-primary--disabled')
   actionButton.setAttribute('disabled', '')
   updateQuestion(Quiz.questions, Quiz.currentQuestion)
 }
@@ -63,17 +72,19 @@ function updateQuestion (questions, index) {
   const question = questions[index]
   questionsField.innerHTML = loadQuestion(question)
   Quiz.currentQuestion += 1
+  actionButton.classList.add('sg-button-primary--disabled')
   actionButton.setAttribute('disabled', '')
   const answerInputs = document.getElementsByClassName('quiz-questions__answer')
   for (let i = 0; i < answerInputs.length; i++) {
     answerInputs[i].addEventListener('click', function () {
+      actionButton.classList.remove('sg-button-primary--disabled')
       actionButton.removeAttribute('disabled')
     })
   }
 }
 
 function loadQuestion (question) {
-  return `<h3 class="quiz-questions__title">${question.question}</h3>"
+  return `<h3 class="quiz-questions__title">${question.question}</h3>
             <form class="quiz-questions__form">
                 ${loadAnswers(question.answers)}    
             </form>`
@@ -88,7 +99,15 @@ function loadAnswers (answers) {
     if (answer.correct) {
       updateCorrectAnswer(answer.id)
     }
-    return `<input type="radio" name="answer" value="${answer.answer}" class="quiz-questions__answer" id="${answer.id}">${answer.answer}`
+    return `<div class="sg-label sg-label--secondary">
+              <div class="sg-label__icon">
+                  <div class="sg-radio">
+                      <input class="sg-radio__element quiz-questions__answer" type="radio" id="${answer.id}" name="answer">
+                      <label class="sg-radio__ghost" for="${answer.id}"></label>
+                  </div>
+              </div>
+              <label class="sg-label__text" for="${answer.id}">${answer.answer}</label>
+            </div>`
   })
 }
 
@@ -110,8 +129,12 @@ function timer (seconds) {
 function displayTime (seconds) {
   const minutesLeft = Math.floor(seconds / 60)
   const secondsLeft = seconds % 60
-  quizTimer.textContent = `${minutesLeft}
-                            :
-                            ${secondsLeft < 10 ? '0' : ''}
-                            ${secondsLeft}`
+  quizTimer.innerHTML = `<div class="sg-badge sg-badge--rounded">
+                               <div class="sg-text sg-text--emphasised quiz-timer__time">
+                                  ${minutesLeft}
+                                  :
+                                  ${secondsLeft < 10 ? '0' : ''}
+                                  ${secondsLeft}
+                               </div>
+                           </div>`
 }

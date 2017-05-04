@@ -6,15 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Quiz App</title>
     <link rel="stylesheet" href="./public/normalize.css">
+    <link href="https://styleguide.brainly.com/77.2.0/style-guide.css" rel="stylesheet"/>
     <link rel="stylesheet" href="./public/style.css">
 </head>
 <body>
-<div id="app" class="container">
-    <h1>Javascript Quiz</h1>
-    <div class="quiz-timer"></div>
-    <div class="quiz-questions"></div>
-    <div class="quiz-results"></div>
-    <button class="btn">START</button>
+<div id="app" class="quiz-container">
+    <div class="quiz-header sg-header">
+        <div class="sg-header__container">
+            <h1 class="sg-header__middle">Javascript Quiz</h1>
+        </div>
+    </div>
+    <div class="sg-content-box quiz-content">
+        <div class="sg-content-box__title sg-content-box__title--with-centered-elements">
+            <div class="quiz-timer"></div>
+        </div>
+        <div class="sg-content-box__content sg-content-box__content--with-centered-text">
+            <div class="sg-text">
+                <div class="quiz-questions"></div>
+            </div>
+        </div>
+        <div class="sg-actions-list sg-actions-list--to-right">
+            <div class="sg-actions-list__hole">
+                <button class="sg-button-primary quiz-btn">
+                    Start
+                </button>
+            </div>
+            <div class="quiz-results"></div>
+        </div>
+    </div>
 </div>
 <script src="public/bundle.js"></script>
 </body>
