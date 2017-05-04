@@ -2,7 +2,7 @@ import fetch from 'isomorphic-fetch'
 import { apiUrl } from './config'
 import { utils } from './utils'
 
-function app () {
+(function app () {
   const actionButton = document.querySelector('.quiz-btn')
   const questionsField = document.querySelector('.quiz-questions')
   const quizTimer = document.querySelector('.quiz-timer')
@@ -43,7 +43,7 @@ function app () {
       actionButton.onclick = () => this.processAnswer()
       actionButton.innerHTML = 'Next'
       utils.disableElement(actionButton)
-      timer(this.timer)
+      this.displayTimer(this.timer)
       this.updateQuestion(this.questions, 0)
     }
     updateQuestion (questions, index) {
@@ -63,9 +63,6 @@ function app () {
       quizTimer.style.display = 'block'
       quizResults.style.display = 'none'
       this.start()
-    }
-    static stopQuiz () {
-      this.showResult()
     }
     showResult () {
       questionsField.style.display = 'none'
@@ -113,31 +110,28 @@ function app () {
                 </div>`
       })
     }
+    displayTimer (seconds) {
+      clearInterval(countdown)
+
+      const presentTime = Date.now()
+      const finishTime = presentTime + seconds * 1000
+
+      utils.displayTime(seconds, quizTimer)
+
+      countdown = setInterval(() => {
+        const secondsLeft = Math.round((finishTime - Date.now()) / 1000)
+
+        if (secondsLeft < 0) {
+          clearInterval(countdown)
+          this.showResult()
+        }
+
+        utils.displayTime(secondsLeft, quizTimer)
+      }, 1000)
+    }
   }
 
   const brainlyQuiz = new Quiz(apiUrl)
   brainlyQuiz.getData()
   actionButton.onclick = () => brainlyQuiz.start()
-
-  function timer (seconds) {
-    clearInterval(countdown)
-
-    const presentTime = Date.now()
-    const finishTime = presentTime + seconds * 1000
-
-    utils.displayTime(seconds, quizTimer)
-
-    countdown = setInterval(() => {
-      const secondsLeft = Math.round((finishTime - Date.now()) / 1000)
-
-      if (secondsLeft < 0) {
-        clearInterval(countdown)
-        Quiz.stopQuiz()
-      }
-
-      utils.displayTime(secondsLeft, quizTimer)
-    }, 1000)
-  }
-}
-
-app()
+}())
