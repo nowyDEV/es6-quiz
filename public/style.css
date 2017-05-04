@@ -53,6 +53,10 @@ html {
     min-width: 120px;
 }
 
+.sg-label {
+    margin-bottom: 1rem;
+}
+
 .sg-label__text,
 .sg-label__number {
     text-align: left;

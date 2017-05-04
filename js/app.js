@@ -17,6 +17,9 @@ function app () {
     userPoints: 0,
     currentQuestion: 0,
     correctAnswer: 0,
+    updateCorrectAnswer (id) {
+      this.correctAnswer = id
+    },
     getData () {
       const processData = (data) => {
         this.timer = data.time_seconds
@@ -65,9 +68,6 @@ function app () {
                                  </div>
                                </div>`
       quizResults.style.display = 'block'
-    },
-    updateCorrectAnswer (id) {
-      this.correctAnswer = id
     }
   }
 
@@ -98,18 +98,19 @@ function app () {
     }
   }
 
-  function loadQuestion (question) {
+  const loadQuestion = (question) => {
     return `<h3 class="quiz-questions__title">${question.question}</h3>
             <form class="quiz-questions__form">
-                ${loadAnswers(question.answers)}    
+                ${loadAnswers(question.answers).join('')}    
             </form>`
   }
 
-  function loadAnswers (answers) {
+  const loadAnswers = (answers) => {
     return answers.map((answer) => {
       if (answer.correct) {
         Quiz.updateCorrectAnswer(answer.id)
       }
+
       return `<div class="sg-label sg-label--secondary">
               <div class="sg-label__icon">
                   <div class="sg-radio">
@@ -124,16 +125,20 @@ function app () {
 
   function timer (seconds) {
     clearInterval(countdown)
+
     const presentTime = Date.now()
     const finishTime = presentTime + seconds * 1000
+
     displayTime(seconds, quizTimer)
 
     countdown = setInterval(() => {
       const secondsLeft = Math.round((finishTime - Date.now()) / 1000)
+
       if (secondsLeft < 0) {
         clearInterval(countdown)
         Quiz.showResult()
       }
+
       displayTime(secondsLeft, quizTimer)
     }, 1000)
   }
