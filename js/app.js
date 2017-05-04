@@ -1,5 +1,6 @@
 import fetch from 'isomorphic-fetch'
 import { apiUrl } from './config'
+import { displayTime } from './timer'
 
 function app () {
   const actionButton = document.querySelector('.quiz-btn')
@@ -64,6 +65,9 @@ function app () {
                                  </div>
                                </div>`
       quizResults.style.display = 'block'
+    },
+    updateCorrectAnswer (id) {
+      this.correctAnswer = id
     }
   }
 
@@ -101,14 +105,10 @@ function app () {
             </form>`
   }
 
-  function updateCorrectAnswer (id) {
-    Quiz.correctAnswer = id
-  }
-
   function loadAnswers (answers) {
     return answers.map((answer) => {
       if (answer.correct) {
-        updateCorrectAnswer(answer.id)
+        Quiz.updateCorrectAnswer(answer.id)
       }
       return `<div class="sg-label sg-label--secondary">
               <div class="sg-label__icon">
@@ -126,7 +126,7 @@ function app () {
     clearInterval(countdown)
     const presentTime = Date.now()
     const finishTime = presentTime + seconds * 1000
-    displayTime(seconds)
+    displayTime(seconds, quizTimer)
 
     countdown = setInterval(() => {
       const secondsLeft = Math.round((finishTime - Date.now()) / 1000)
@@ -134,21 +134,8 @@ function app () {
         clearInterval(countdown)
         Quiz.showResult()
       }
-      displayTime(secondsLeft)
+      displayTime(secondsLeft, quizTimer)
     }, 1000)
-  }
-
-  function displayTime (seconds) {
-    const minutesLeft = Math.floor(seconds / 60)
-    const secondsLeft = seconds % 60
-    quizTimer.innerHTML = `<div class="sg-badge sg-badge--rounded">
-                               <div class="sg-text sg-text--emphasised quiz-timer__time">
-                                  ${minutesLeft}
-                                  :
-                                  ${secondsLeft < 10 ? '0' : ''}
-                                  ${secondsLeft}
-                               </div>
-                           </div>`
   }
 }
 
