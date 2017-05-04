@@ -28,6 +28,7 @@ function app () {
         .then(data => processData(data))
         .catch(error => console.log('Something went wrong', error))
     },
+
     start () {
       actionButton.onclick = () => processAnswer()
       actionButton.innerHTML = 'Next'
@@ -36,6 +37,7 @@ function app () {
       timer(this.timer)
       updateQuestion(this.questions, 0)
     },
+
     reset () {
       this.userPoints = 0
       this.currentQuestion = 0
@@ -45,6 +47,7 @@ function app () {
       quizResults.style.display = 'none'
       this.start()
     },
+
     showResult () {
       questionsField.style.display = 'none'
       quizTimer.style.display = 'none'
