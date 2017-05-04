@@ -1,4 +1,6 @@
+const webpack = require('webpack')
 const path = require('path')
+const nodeEnv = process.env.NODE_ENV || 'production'
 
 module.exports = {
   context: __dirname,
@@ -38,5 +40,15 @@ module.exports = {
         loader: 'babel-loader'
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.optimize.UglifyJsPlugin({
+      compress: { warnings: false },
+      output: { comments: false },
+      sourceMap: true
+    }),
+    new webpack.DefinePlugin({
+      'process.env': { NODE_ENV: JSON.stringify(nodeEnv) }
+    })
+  ]
 }

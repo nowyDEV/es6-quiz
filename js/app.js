@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch'
+import { apiUrl } from './config'
 
 function app () {
   const actionButton = document.querySelector('.quiz-btn')
@@ -16,15 +17,13 @@ function app () {
     currentQuestion: 0,
     correctAnswer: 0,
     getData () {
-      const URL = 'https://cdn.rawgit.com/kdzwinel/cd08d08002995675f10d065985257416/raw/811ad96a0567648ff858b4f14d0096ba241f28ef/quiz-data.json'
-
       const processData = (data) => {
         this.timer = data.time_seconds
         this.questions = data.questions
         console.log(this)
       }
 
-      return fetch(URL)
+      return fetch(apiUrl)
         .then(response => response.json())
         .then(data => processData(data))
         .catch(error => console.log('Something went wrong', error))
