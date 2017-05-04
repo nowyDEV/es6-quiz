@@ -3,54 +3,69 @@ import fetch from 'isomorphic-fetch'
 function app () {
   const actionButton = document.querySelector('.quiz-btn')
   const questionsField = document.querySelector('.quiz-questions')
-  let countdown
   const quizTimer = document.querySelector('.quiz-timer')
   const quizResults = document.querySelector('.quiz-results')
+  let countdown
 
-  actionButton.onclick = () => startQuiz()
+  actionButton.onclick = () => Quiz.start()
 
   const Quiz = {
     timer: 0,
     questions: [],
     userPoints: 0,
     currentQuestion: 0,
-    correctAnswer: 0
-  }
+    correctAnswer: 0,
+    getData () {
+      const URL = 'https://cdn.rawgit.com/kdzwinel/cd08d08002995675f10d065985257416/raw/811ad96a0567648ff858b4f14d0096ba241f28ef/quiz-data.json'
 
-  function getData () {
-    const URL = 'https://cdn.rawgit.com/kdzwinel/cd08d08002995675f10d065985257416/raw/811ad96a0567648ff858b4f14d0096ba241f28ef/quiz-data.json'
+      const processData = (data) => {
+        this.timer = data.time_seconds
+        this.questions = data.questions
+        console.log(this)
+      }
 
-    function processData (data) {
-      Quiz.timer = data.time_seconds
-      Quiz.questions = data.questions
-      console.log(Quiz)
+      return fetch(URL)
+        .then(response => response.json())
+        .then(data => processData(data))
+        .catch(error => console.log('Something went wrong', error))
+    },
+    start () {
+      actionButton.onclick = () => processAnswer()
+      actionButton.innerHTML = 'Next'
+      actionButton.classList.add('sg-button-primary--disabled')
+      actionButton.setAttribute('disabled', '')
+      timer(this.timer)
+      updateQuestion(this.questions, 0)
+    },
+    reset () {
+      this.userPoints = 0
+      this.currentQuestion = 0
+      this.correctAnswer = 0
+      questionsField.style.display = 'block'
+      quizTimer.style.display = 'block'
+      quizResults.style.display = 'none'
+      this.start()
+    },
+    showResult () {
+      questionsField.style.display = 'none'
+      quizTimer.style.display = 'none'
+      actionButton.innerHTML = 'Try Again'
+      actionButton.onclick = () => this.reset()
+      quizResults.innerHTML = `<div class="sg-flash">
+                                 <div class="sg-flash__message">
+                                   <div class="sg-text sg-text--emphasised sg-text--standout sg-text--light">
+                                     Correct answers: 
+                                                      <div class="sg-badge sg-badge--large sg-badge--blue-secondary-light">
+                                                        <div class="sg-text sg-text--emphasised sg-text--standout sg-text--blue"> ${this.userPoints} / ${this.questions.length}</div>
+                                                      </div>
+                                   </div>
+                                 </div>
+                               </div>`
+      quizResults.style.display = 'block'
     }
-
-    return fetch(URL)
-      .then(response => response.json())
-      .then(data => processData(data))
-      .catch(error => console.log('Something went wrong', error))
   }
-  getData()
 
-  function showResult () {
-    const result = Quiz.userPoints
-    const total = Quiz.questions.length
-    questionsField.style.display = 'none'
-    quizTimer.style.display = 'none'
-    actionButton.innerHTML = 'Try Again'
-    actionButton.onclick = () => resetQuiz()
-    quizResults.innerHTML = `<div class="sg-flash">
-                                                         <div class="sg-flash__message">
-                                                           <div class="sg-text sg-text--emphasised sg-text--standout sg-text--light">
-                                                             Correct answers: <div class="sg-badge sg-badge--large sg-badge--blue-secondary-light">
-                                                                                <div class="sg-text sg-text--emphasised sg-text--standout sg-text--blue"> ${result} / ${total}</div>
-                                                                              </div>
-                                                           </div>
-                                                         </div>
-                                                       </div>`
-    quizResults.style.display = 'block'
-  }
+  Quiz.getData()
 
   function processAnswer () {
     if (Quiz.currentQuestion < Quiz.questions.length) {
@@ -59,26 +74,7 @@ function app () {
         Quiz.userPoints += 1
       }
       updateQuestion(Quiz.questions, Quiz.currentQuestion)
-    } else showResult()
-  }
-
-  function startQuiz () {
-    actionButton.onclick = () => processAnswer()
-    timer(Quiz.timer)
-    actionButton.innerHTML = 'Next'
-    actionButton.classList.add('sg-button-primary--disabled')
-    actionButton.setAttribute('disabled', '')
-    updateQuestion(Quiz.questions, Quiz.currentQuestion)
-  }
-
-  function resetQuiz () {
-    Quiz.userPoints = 0
-    Quiz.currentQuestion = 0
-    Quiz.correctAnswer = 0
-    questionsField.style.display = 'block'
-    quizTimer.style.display = 'block'
-    quizResults.style.display = 'none'
-    startQuiz()
+    } else Quiz.showResult()
   }
 
   function updateQuestion (questions, index) {
@@ -134,7 +130,7 @@ function app () {
       const secondsLeft = Math.round((finishTime - Date.now()) / 1000)
       if (secondsLeft < 0) {
         clearInterval(countdown)
-        showResult()
+        Quiz.showResult()
       }
       displayTime(secondsLeft)
     }, 1000)
