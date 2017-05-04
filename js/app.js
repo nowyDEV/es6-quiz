@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch'
 import { apiUrl } from './config'
-import { displayTime } from './utils'
+import { displayTime, disableElement, activateElement } from './utils'
 
 function app () {
   const actionButton = document.querySelector('.quiz-btn')
@@ -36,8 +36,7 @@ function app () {
     start () {
       actionButton.onclick = () => processAnswer()
       actionButton.innerHTML = 'Next'
-      actionButton.classList.add('sg-button-primary--disabled')
-      actionButton.setAttribute('disabled', '')
+      disableElement(actionButton)
       timer(this.timer)
       updateQuestion(this.questions, 0)
     },
@@ -55,8 +54,11 @@ function app () {
     showResult () {
       questionsField.style.display = 'none'
       quizTimer.style.display = 'none'
+
       actionButton.innerHTML = 'Try Again'
       actionButton.onclick = () => this.reset()
+      activateElement(actionButton)
+
       quizResults.innerHTML = `<div class="sg-flash">
                                  <div class="sg-flash__message">
                                    <div class="sg-text sg-text--emphasised sg-text--standout sg-text--light">
@@ -87,13 +89,12 @@ function app () {
     const question = questions[index]
     questionsField.innerHTML = loadQuestion(question)
     Quiz.currentQuestion += 1
-    actionButton.classList.add('sg-button-primary--disabled')
-    actionButton.setAttribute('disabled', '')
+    disableElement(actionButton)
+
     const answerInputs = document.getElementsByClassName('quiz-questions__answer')
     for (let i = 0; i < answerInputs.length; i++) {
       answerInputs[i].addEventListener('click', function () {
-        actionButton.classList.remove('sg-button-primary--disabled')
-        actionButton.removeAttribute('disabled')
+        activateElement(actionButton)
       })
     }
   }
@@ -112,14 +113,14 @@ function app () {
       }
 
       return `<div class="sg-label sg-label--secondary">
-              <div class="sg-label__icon">
-                  <div class="sg-radio">
-                      <input class="sg-radio__element quiz-questions__answer" type="radio" id="${answer.id}" name="answer">
-                      <label class="sg-radio__ghost" for="${answer.id}"></label>
+                  <div class="sg-label__icon">
+                      <div class="sg-radio">
+                          <input class="sg-radio__element quiz-questions__answer" type="radio" id="${answer.id}" name="answer">
+                          <label class="sg-radio__ghost" for="${answer.id}"></label>
+                      </div>
                   </div>
-              </div>
-              <label class="sg-label__text" for="${answer.id}">${answer.answer}</label>
-            </div>`
+                  <label class="sg-label__text" for="${answer.id}">${answer.answer}</label>
+              </div>`
     })
   }
 

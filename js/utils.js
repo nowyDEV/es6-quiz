@@ -10,3 +10,13 @@ export function displayTime (seconds, container) {
                                </div>
                            </div>`
 }
+
+export function disableElement (element) {
+  element.classList.add('sg-button-primary--disabled')
+  element.setAttribute('disabled', '')
+}
+
+export function activateElement (element) {
+  element.classList.remove('sg-button-primary--disabled')
+  element.removeAttribute('disabled')
+}
