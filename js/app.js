@@ -1,3 +1,4 @@
+import ES6Promise from 'es6-promise'
 import fetch from 'isomorphic-fetch'
 import { apiUrl } from './config'
 import { utils } from './utils'
@@ -11,7 +12,8 @@ import { utils } from './utils'
 
   // Toggle off disabled state on the button after user checks answer
   questionsField.addEventListener('click', function (e) {
-    if (e.target.matches('.quiz-questions__answer')) {
+    let matches = e.target.matches ? e.target.matches('.quiz-questions__answer') : e.target.msMatchesSelector('.quiz-questions__answer')
+    if (matches) {
       utils.activateElement(actionButton)
     }
   }, false)
@@ -27,6 +29,7 @@ import { utils } from './utils'
     }
 
     getData () {
+      ES6Promise.polyfill()
       const processData = (data) => {
         this.timer = data.time_seconds
         this.questions = data.questions
@@ -87,11 +90,15 @@ import { utils } from './utils'
     processAnswer () {
       if (this.currentQuestion < this.questions.length) {
         const answer = parseInt(document.querySelector('input[name=answer]:checked').getAttribute('id'))
+
         if (answer === this.correctAnswer) {
           this.addPoint()
         }
+
         this.updateQuestion(this.questions[this.currentQuestion])
-      } else this.showResult()
+      } else {
+        this.showResult()
+      }
     }
 
     updateCorrectAnswer (id) {
